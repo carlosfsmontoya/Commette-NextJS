@@ -14,17 +14,61 @@ import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Navbar from '@/component/Navbar';
 
+
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+
+import { LoginUser } from  '@/services/users';
+import { LoginFormValidator } from '@/utils/utils';
+
 const defaultTheme = createTheme();
 
 export default function SignInSide() {
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
-    };
+
+
+    const router = useRouter();
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [warningMessage, setWarningMessage] = useState<string[]>([]);
+
+    //Limpiamos localStorage
+    useEffect(() => {
+        console.log('Cleaning localStorage');
+        localStorage.removeItem('token');
+    }, []);
+
+    const handleSubmit = (e: { preventDefault: () => void; }) => {
+        e.preventDefault();
+
+        console.log('Email:', email);
+        console.log(password)
+        const warnings = LoginFormValidator(
+            email,
+            password
+        );
+
+        if (warnings.length === 0) {
+            LoginUser({
+                email: email,
+                password: password
+            }).then( (response) => {
+                if (response.error) {
+                    setWarningMessage([response.error] as never[]);
+                } else {
+                    localStorage.setItem('token', response.idToken);
+                    router.push('/');
+                }
+            }).catch( (error) => {
+                setWarningMessage(['Network response was not ok','User or password incorrect']);
+            })
+        }else{
+            setWarningMessage(warnings);
+        }
+    }
+
+
+
 
     return (
         <ThemeProvider theme={defaultTheme}>
@@ -66,6 +110,7 @@ export default function SignInSide() {
                                 margin="normal"
                                 required
                                 fullWidth
+                                onChange={ (e) => setEmail( e.target.value ) }
                                 id="email"
                                 label="Email Address"
                                 name="email"
@@ -76,6 +121,7 @@ export default function SignInSide() {
                                 margin="normal"
                                 required
                                 fullWidth
+                                onChange={ (e) => setPassword( e.target.value ) }
                                 name="password"
                                 label="Password"
                                 type="password"
