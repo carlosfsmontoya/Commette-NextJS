@@ -2,6 +2,7 @@
 
 import { useEffect, useState, FormEvent, useCallback } from 'react';
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import { useProtectRoute } from '@/utils/protectedRoute'; 
 
 interface Message {
   sender_id: string;
@@ -10,6 +11,8 @@ interface Message {
 }
 
 const Chat = () => {
+  useProtectRoute('/login');
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [idUser, setIdUser] = useState('');
   const [idParticipants, setIdParticipants] = useState('');

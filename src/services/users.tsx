@@ -12,9 +12,8 @@ export async function GetUserInfo() {
     });
 
     if (!response.ok) {
-        // Lanza un error que incluye la respuesta
         const error = new Error('Network response was not ok') as any;
-        error.response = response; // Añade la respuesta al error
+        error.response = response; 
         throw error;
     }
 

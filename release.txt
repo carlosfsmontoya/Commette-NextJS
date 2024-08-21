@@ -1,0 +1,8 @@
+docker buildx build --platform linux/amd64 -t commette-ui-dev:latest . --load
+docker run -d -p 3000:3000 --name my-nextjs-container commette-ui-dev:latest
+az login
+az acr login --name acrcommettedev
+docker tag commette-ui-dev:latest acrcommettedev.azurecr.io/commette-ui-dev:latest
+docker tag commette-ui-dev:latest acrcommettedev.azurecr.io/commette-ui-dev:0.1.10
+docker push acrcommettedev.azurecr.io/commette-ui-dev:latest
+docker push acrcommettedev.azurecr.io/commette-ui-dev:0.1.10
