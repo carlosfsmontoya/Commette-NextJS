@@ -1,9 +1,9 @@
 import settings from "./settings";
-import { HTTPError } from '@/utils/HttpError'
+import { HTTPError } from '@/utils/httpError'
 
 export async function GetMessage() {
 
-    const response = await fetch(`${ settings.chatDomain }/api/hello`,{
+    const response = await fetch(`${ settings.CHAT_DOMAIN }/api/hello`,{
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

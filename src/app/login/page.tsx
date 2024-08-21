@@ -3,9 +3,6 @@
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -13,78 +10,63 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Navbar from '@/component/Navbar';
-
-
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-
 import { LoginUser } from  '@/services/users';
 import { LoginFormValidator } from '@/utils/utils';
 
 const defaultTheme = createTheme();
 
 export default function SignInSide() {
-
-
     const router = useRouter();
-
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [warningMessage, setWarningMessage] = useState<string[]>([]);
+    const [warningMessages, setWarningMessages] = useState<string[]>([]);
 
-    //Limpiamos localStorage
+    // Limpiamos localStorage
     useEffect(() => {
         console.log('Cleaning localStorage');
         localStorage.removeItem('token');
     }, []);
 
-    const handleSubmit = (e: { preventDefault: () => void; }) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        console.log('Email:', email);
-        console.log(password)
-        const warnings = LoginFormValidator(
-            email,
-            password
-        );
+        const warnings = LoginFormValidator(email, password);
 
         if (warnings.length === 0) {
-            LoginUser({
-                email: email,
-                password: password
-            }).then( (response) => {
+            try {
+                const response = await LoginUser({
+                    email: email,
+                    password: password
+                });
+
                 if (response.error) {
-                    setWarningMessage([response.error] as never[]);
+                    setWarningMessages([response.error]);
                 } else {
                     localStorage.setItem('token', response.idToken);
                     router.push('/');
                 }
-            }).catch( (error) => {
-                setWarningMessage(['Network response was not ok','User or password incorrect']);
-            })
-        }else{
-            setWarningMessage(warnings);
+            } catch (error) {
+                setWarningMessages(['Network response was not ok', 'User or password incorrect']);
+            }
+        } else {
+            setWarningMessages(warnings);
         }
-    }
-
-
-
+    };
 
     return (
         <ThemeProvider theme={defaultTheme}>
             <Navbar />
-            <Grid container component="main" >
+            <Grid container component="main">
                 <Grid
                     item
                     xs={false}
                     sm={4}
                     md={7}
                     sx={{
-                        backgroundImage:
-                            'url("/images/login-bg.png")',
-
-                        backgroundColor: (t) =>
-                            t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
+                        backgroundImage: 'url("/images/login-bg.png")',
+                        backgroundColor: (t) => t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
                         backgroundSize: 'cover',
                         backgroundPosition: 'left',
                     }}
@@ -106,11 +88,27 @@ export default function SignInSide() {
                             Login
                         </Typography>
                         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                            {warningMessages.length > 0 && (
+                                <Box
+                                    sx={{
+                                        mb: 2,
+                                        p: 2,
+                                        backgroundColor: 'error.main', // Fondo rojo
+                                        borderRadius: 1,
+                                    }}
+                                >
+                                    {warningMessages.map((message, index) => (
+                                        <Typography key={index} color="common.white">
+                                            {message}
+                                        </Typography>
+                                    ))}
+                                </Box>
+                            )}
                             <TextField
                                 margin="normal"
                                 required
                                 fullWidth
-                                onChange={ (e) => setEmail( e.target.value ) }
+                                onChange={(e) => setEmail(e.target.value)}
                                 id="email"
                                 label="Email Address"
                                 name="email"
@@ -121,16 +119,12 @@ export default function SignInSide() {
                                 margin="normal"
                                 required
                                 fullWidth
-                                onChange={ (e) => setPassword( e.target.value ) }
+                                onChange={(e) => setPassword(e.target.value)}
                                 name="password"
                                 label="Password"
                                 type="password"
                                 id="password"
                                 autoComplete="current-password"
-                            />
-                            <FormControlLabel
-                                control={<Checkbox value="remember" color="primary" />}
-                                label="Remember me"
                             />
                             <Button
                                 type="submit"
@@ -140,18 +134,7 @@ export default function SignInSide() {
                             >
                                 Sign In
                             </Button>
-                            <Grid container>
-                                <Grid item xs>
-                                    <Link href="#" variant="body2">
-                                        Forgot password?
-                                    </Link>
-                                </Grid>
-                                <Grid item>
-                                    <Link href="signup" variant="body2">
-                                        {"Don't have an account? Sign Up"}
-                                    </Link>
-                                </Grid>
-                            </Grid>
+
                         </Box>
                     </Box>
                 </Grid>

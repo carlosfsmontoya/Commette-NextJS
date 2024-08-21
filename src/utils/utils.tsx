@@ -3,7 +3,10 @@ export function SignUpFormValidator(
     password: string,
     confirmPassword: string,
     name: string,
-    lastname: string
+    lastname: string,
+    username: string,
+    isSeller: boolean,
+    companyName: string | null
 ){
 
     const warnings = [];
@@ -26,6 +29,16 @@ export function SignUpFormValidator(
 
     if (password !== confirmPassword) {
         warnings.push('Passwords do not match');
+    }
+
+    if (!username) {
+        warnings.push('Username is required');
+    } else if (username.length < 3) {
+        warnings.push('Username must be at least 3 characters long');
+    }
+
+    if (isSeller && !companyName) {
+        warnings.push('Company name is required for sellers');
     }
 
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
