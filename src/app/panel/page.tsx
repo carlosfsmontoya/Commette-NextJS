@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import { useProtectRoute } from '@/utils/protectedRoute'; 
 import ProductList from '@/component/ProductList';
 import NavBar from '@/component/Navbar';
-import { GetProducts } from '@/services/products'; 
+import { GetProductsByUserId } from '@/services/products'; // Asegúrate de que la ruta sea correcta
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<{ 
-     ProductID: number;
+    ProductID: number;
       ProductName: string; 
       BrandName: string; 
       CategoryName: string; 
@@ -20,12 +20,12 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useProtectRoute('/login');
+  useProtectRoute('/product', ['Seller']);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const productData = await GetProducts();
+        const productData = await GetProductsByUserId();
         setProducts(productData);
         console.log(productData);
       } catch (err) {
@@ -45,7 +45,7 @@ export default function ProductsPage() {
   return (
     <>
       <NavBar />
-      <ProductList products={products} isMy={false}/>
+      <ProductList products={products} isMy={true}/>
     </>
   );
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -21,6 +22,8 @@ import { Register } from "@/services/users";
 const defaultTheme = createTheme();
 
 export default function SignUp() {
+    const router = useRouter();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -63,7 +66,7 @@ export default function SignUp() {
                 if (response.error) {
                     setWarningMessages([response.error]);
                 } else {
-                    // Redirigir o mostrar un mensaje de éxito
+                    router.push('/login');
                 }
             }).catch((error) => {
                 setWarningMessages(["User already exists"]);

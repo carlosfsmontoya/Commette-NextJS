@@ -1,38 +1,54 @@
 import { Card, CardContent, Typography, CardActions, Button } from '@mui/material';
 import Link from 'next/link';
 
-
 interface ProductCardProps {
   product: {
-    name: string;
-    brand: string;
-    category: string;
-    description: string;
-    quantity: number;
-    id: string;
+    ProductID: number;
+    ProductName: string;
+    BrandName: string;
+    CategoryName: string;
+    ProductDescription: string;
+    QuantityAvailable: number;
+    SellerCompany: string;
+    Price: number;
   };
+  isMy: boolean;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, isMy }: ProductCardProps) {
   return (
     <Card>
       <CardContent>
-        <Typography variant="h5">{product.name}</Typography>
-        <Typography color="textSecondary">{product.brand}</Typography>
+        <Typography variant="h5">{product.ProductName}</Typography>
+        <Typography color="textSecondary">{product.BrandName}</Typography>
         <Typography variant="body2" color="textSecondary">
-          {product.category}
+          {product.CategoryName}
         </Typography>
         <Typography variant="body1" sx={{ mt: 1 }}>
-          {product.description}
+          {product.ProductDescription}
         </Typography>
         <Typography variant="body1" sx={{ mt: 1 }}>
-          Quantity: {product.quantity}
+          Quantity Available: {product.QuantityAvailable}
+        </Typography>
+        <Typography variant="body1" sx={{ mt: 1 }}>
+          Price: ${product.Price.toFixed(2)}
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          Seller: {product.SellerCompany}
         </Typography>
       </CardContent>
       <CardActions>
-        <Link href={`/products/${product.id}`} passHref>
-          <Button size="small" color="primary">Edit</Button>
-        </Link>
+        {isMy ? (
+          <Link href={`/product/${product.ProductID}`} passHref>
+            <Button size="small" color="primary">
+              Edit
+            </Button>
+          </Link>
+        ) : (
+          <Button size="small" color="primary">
+            Buy
+          </Button>
+        )}
       </CardActions>
     </Card>
   );

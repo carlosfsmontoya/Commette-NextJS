@@ -14,6 +14,8 @@ import { ActivateUser } from '@/services/users';
 
 const Activate = () => {
 
+    const router = useRouter();
+
     const [warningMessage, setWarningMessage] = useState<string[]>([]);
     const [code, setCode] = useState('');
     const [open, setOpen] = useState(false);
@@ -29,6 +31,7 @@ const Activate = () => {
         setSending(true);
         ActivateUser(code).then((response) => {
             setOpen(true);
+            router.push('/login');
         }).catch((error) => {
             setWarningMessage(['Code is incorrect']);
             setSending(false);

@@ -1,97 +1,192 @@
-import React, { useState } from 'react';
-import { TextField, MenuItem, Select, InputLabel, FormControl, Button, Box } from '@mui/material';
-import { SelectChangeEvent } from '@mui/material/Select';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { Button, TextField, MenuItem, Grid } from '@mui/material';
 
-// Define las props que acepta el formulario
 interface ProductFormProps {
   product: {
-    brand: string;
-    category: string;
-    name: string;
-    description: string;
-    quantity: number;
-  };
-  categories: any[];
-  brands: any[];
+    BrandName: string;
+    CategoryName: string;
+    ProductName: string;
+    ProductDescription: string;
+    image: string;
+    Price: number;
+    QuantityAvailable: number;
+  }[];
+  categories: { id: number; name: string; description: string }[];
+  brands: { id: number; name: string; description: string }[];
+  id_seller: number;
   onSubmit: (product: any) => void;
+  onDelete?: () => void; 
+  isEdit: boolean;
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({ product, categories, brands, onSubmit }) => {
-  const [formState, setFormState] = useState(product);
+const ProductForm: React.FC<ProductFormProps> = ({ product, categories, brands, id_seller, onSubmit, onDelete, isEdit }) => {
+  const [formData, setFormData] = useState({
+    brand: '',
+    category: '',
+    name: '',
+    description: '',
+    image: '',
+    price: 0,
+    quantity: 0,
+  });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    console.log('Product:', product);
+    if (isEdit && product && product.length > 0) {
+      const productData = product[0];
+      const brandId = brands.find(brand => brand.name === productData.BrandName)?.id.toString() || '';
+      const categoryId = categories.find(category => category.name === productData.CategoryName)?.id.toString() || '';
+      setFormData({
+        brand: brandId,
+        category: categoryId,
+        name: productData.ProductName || '',
+        description: productData.ProductDescription || '',
+        image: productData.image || '',
+        price: productData.Price || 0,
+        quantity: productData.QuantityAvailable || 0,
+      });
+    }
+  }, [product, isEdit, brands, categories]);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormState({ ...formState, [name]: value });
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleSelectChange = (event: SelectChangeEvent<string>) => {
-    const { name, value } = event.target;
-    setFormState({ ...formState, [name]: value });
+  const handleSelectChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    onSubmit(formState);
+    const productData = {
+      id_brand: parseInt(formData.brand, 10),
+      id_category: parseInt(formData.category, 10),
+      product_name: formData.name,
+      product_image: formData.image || undefined,
+      product_description: formData.description || undefined,
+      id_seller: id_seller,
+      price: parseFloat(formData.price.toString()),  
+      stock: parseInt(formData.quantity.toString(), 10)  
+    };
+    onSubmit(productData);
   };
+
+  if (!product || product.length === 0) return <p>Loading product data...</p>;
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 2 }}>
+    <form onSubmit={handleSubmit}>
+      <Grid container spacing={2} mt={5}>
+      <Grid item xs={12} sm={6} >
       <TextField
-        label="Product Name"
-        name="name"
-        value={formState.name}
-        onChange={handleInputChange}
-        fullWidth
-      />
-      <TextField
-        label="Description"
-        name="description"
-        value={formState.description}
-        onChange={handleInputChange}
-        fullWidth
-      />
-      <TextField
-        label="Quantity"
-        name="quantity"
-        type="number"
-        value={formState.quantity}
-        onChange={handleInputChange}
-        fullWidth
-      />
-      <FormControl fullWidth>
-        <InputLabel>Brand</InputLabel>
-        <Select
-          name="brand"
-          value={formState.brand}
-          onChange={handleSelectChange}
-          label="Brand"
-        >
-          {brands.map((brand) => (
-            <MenuItem key={brand.id} value={brand.id}>
-              {brand.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl fullWidth>
-        <InputLabel>Category</InputLabel>
-        <Select
-          name="category"
-          value={formState.category}
-          onChange={handleSelectChange}
-          label="Category"
-        >
-          {categories.map((category) => (
-            <MenuItem key={category.id} value={category.id}>
-              {category.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <Button type="submit" variant="contained" color="primary">
-        Create Product
-      </Button>
-    </Box>
+            select
+            name="brand"
+            label="Brand"
+            value={formData.brand}
+            onChange={handleSelectChange}
+            fullWidth
+            required
+
+          >
+            {brands.map((brand) => (
+              <MenuItem key={brand.id} value={brand.id}>
+                {brand.name}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            select
+            name="category"
+            label="Category"
+            value={formData.category}
+            onChange={handleSelectChange}
+            fullWidth
+            required
+
+          >
+            {categories.map((category) => (
+              <MenuItem key={category.id} value={category.id}>
+                {category.name}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            name="name"
+            label="Product Name"
+            value={formData.name}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            name="description"
+            label="Description"
+            value={formData.description}
+            onChange={handleChange}
+            fullWidth
+            multiline
+            rows={4}
+            required
+
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            name="image"
+            label="Image URL"
+            value={formData.image}
+            onChange={handleChange}
+            fullWidth
+            required
+
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            name="price"
+            label="Price"
+            type="number"
+            value={formData.price}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            name="quantity"
+            label="Quantity"
+            type="number"
+            value={formData.quantity}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Button type="submit" variant="contained" color="primary">
+            {isEdit ? 'Update Product' : 'Create Product'}
+          </Button>
+          {isEdit && (
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={onDelete}
+              style={{ marginLeft: '10px' }}
+            >
+              Delete Product
+            </Button>
+          )}
+        </Grid>
+      </Grid>
+    </form>
   );
 };
 
